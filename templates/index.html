@@ -943,14 +943,13 @@ async function logout() {
 
     try {
         const response = await fetch('/api/hunts', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                log_text: logText,
-                local_hunt: huntLocation,
-                notas: huntNotes
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include', // Adicione esta linha
+    body: JSON.stringify({
+        log_text: logText,
+        local_hunt: huntLocation,
+        notas: huntNotes
             })
         });
 
@@ -971,38 +970,24 @@ async function logout() {
 
 
         async function loadHunts(page = 1) {
-            currentPage = page;
-            
-            // Get filter values
-            const filters = {
-                page: page,
-                per_page: 10,
-                date_from: document.getElementById('filterDateFrom')?.value,
-                date_to: document.getElementById('filterDateTo')?.value,
-                min_xp_h: document.getElementById('filterMinXpH')?.value,
-                min_lucro: document.getElementById('filterMinProfit')?.value,
-                local_hunt: document.getElementById('filterLocation')?.value
-            };
-
-            // Remove empty filters
-            Object.keys(filters).forEach(key => {
-                if (!filters[key]) delete filters[key];
-            });
-
-            const queryString = new URLSearchParams(filters).toString();
-
-            try {
-                const response = await fetch(`/api/hunts?${queryString}`);
-                const data = await response.json();
-                
-                huntsData = data.hunts;
-                displayHunts(data.hunts);
-                updatePagination(data.page, data.total_pages, data.total);
-            } catch (error) {
-                console.error('Error loading hunts:', error);
-                showAlert('Erro ao carregar hunts', 'error');
-            }
+    try {
+        const response = await fetch(`/api/hunts?page=${page}`, {
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erro ao carregar hunts');
         }
+        
+        const data = await response.json();
+        displayHunts(data.hunts);
+        updatePagination(data.page, data.total_pages, data.total);
+        
+    } catch (error) {
+        console.error('Error loading hunts:', error);
+        showAlert(error.message, 'error');
+    }
+}
 
         function displayHunts(hunts) {
             const tbody = document.getElementById('huntsTableBody');
@@ -1025,11 +1010,9 @@ async function logout() {
                     <td>
                         <button class="btn btn-sm btn-primary" onclick="editHunt(${hunt.id})" title="Editar">
                             <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger" 
-                        onclick="removeFromCatalog(${hunt.id})"
-                         title="Remover">
-                            <i class="fas fa-trash"></i>
+                            </button>
+                       <button class="btn btn-sm btn-danger" onclick="deleteHunt(${hunt.id})" title="Remover">
+                        <i class="fas fa-trash"></i>
                         </button>
                     </td>
                 </tr>
@@ -1130,6 +1113,36 @@ async function logout() {
 ).join('');
 
         }
+
+        async function deleteHunt(huntId) {
+    if (!confirm('Tem certeza que deseja excluir esta hunt?')) return;
+
+    try {
+        const response = await fetch(`/api/hunts/${huntId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            showAlert('Hunt excluída!', 'success');
+            loadHunts(currentPage);
+        } else {
+            const error = await response.json();
+            showAlert(error.error, 'error');
+        }
+    } catch (error) {
+        showAlert('Erro ao excluir hunt', 'error');
+    }
+}
+
+function clearForm() {
+    document.getElementById('logText').value = '';
+    document.getElementById('huntLocation').value = '';
+    document.getElementById('huntNotes').value = '';
+}
+
+
+
 
         async function addHuntToCatalog() {
             const vocation = document.getElementById('modalVocation').value;
@@ -1247,72 +1260,7 @@ async function logout() {
             }
         }
 
-        async function deleteHunt(huntId) {
-            if (!confirm('Tem certeza que deseja excluir esta hunt?')) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/hunts/${huntId}`, {
-                    method: 'DELETE'
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    showAlert('Hunt excluída com sucesso!', 'success');
-                    loadHunts(currentPage);
-                    loadStatistics();
-                } else {
-                    showAlert(result.error, 'error');
-                }
-            } catch (error) {
-                showAlert('Erro ao excluir hunt', 'error');
-            }
-        }
-
-        // Filters and sorting
-        function applyFilters() {
-            loadHunts(1);
-        }
-
-        function sortTable(field) {
-            if (currentSort.field === field) {
-                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-            } else {
-                currentSort.field = field;
-                currentSort.direction = 'desc';
-            }
-
-            // Update sort indicators
-            document.querySelectorAll('.table th i').forEach(icon => {
-                icon.className = 'fas fa-sort';
-            });
-
-            const currentIcon = document.querySelector(`th[onclick="sortTable('${field}')"] i`);
-            if (currentIcon) {
-                currentIcon.className = `fas fa-sort-${currentSort.direction === 'asc' ? 'up' : 'down'}`;
-            }
-
-            // Sort data
-            huntsData.sort((a, b) => {
-                let aVal = a[field];
-                let bVal = b[field];
-
-                if (typeof aVal === 'string') {
-                    aVal = aVal.toLowerCase();
-                    bVal = bVal.toLowerCase();
-                }
-
-                if (currentSort.direction === 'asc') {
-                    return aVal > bVal ? 1 : -1;
-                } else {
-                    return aVal < bVal ? 1 : -1;
-                }
-            });
-
-            displayHunts(huntsData);
-        }
+        
 
         // Export functions
         async function exportData(format) {
