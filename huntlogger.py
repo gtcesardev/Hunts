@@ -303,88 +303,50 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/api/hunts', methods=['GET'])
-def get_hunts():
-    """Get all hunts with filtering and pagination"""
-    page = int(request.args.get('page', 1))
-    per_page = int(request.args.get('per_page', 10))
-    
-    # Filters
-    date_from = request.args.get('date_from')
-    date_to = request.args.get('date_to')
-    min_xp_h = request.args.get('min_xp_h')
-    min_lucro = request.args.get('min_lucro')
-    local_hunt = request.args.get('local_hunt')
-    
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    
-    # Build query with filters
-    query = "SELECT * FROM hunts WHERE 1=1"
-    params = []
-    
-    if date_from:
-        query += " AND data >= ?"
-        params.append(date_from)
-    
-    if date_to:
-        query += " AND data <= ?"
-        params.append(date_to)
-    
-    if min_xp_h:
-        query += " AND xp_h >= ?"
-        params.append(int(min_xp_h))
-    
-    if min_lucro:
-        query += " AND lucro >= ?"
-        params.append(int(min_lucro))
-    
-    if local_hunt:
-        query += " AND local_hunt LIKE ?"
-        params.append(f"%{local_hunt}%")
-    
-    # Count total records
-    count_query = f"SELECT COUNT(*) FROM ({query})"
-    cursor.execute(count_query, params)
-    total = cursor.fetchone()[0]
-    
-    # Add pagination
-    query += " ORDER BY id DESC LIMIT ? OFFSET ?"
-    params.extend([per_page, (page - 1) * per_page])
-    
-    cursor.execute(query, params)
-    hunts = cursor.fetchall()
-    conn.close()
-    
-    # Convert to dict format
-    hunt_list = []
-    for hunt in hunts:
-        hunt_dict = {
-            'id': hunt[0],
-            'data': hunt[1],
-            'duracao': hunt[2],
-            'xp': hunt[3],
-            'xp_h': hunt[4],
-            'dano_causado': hunt[5],
-            'dano_sofrido': hunt[6],
-            'cura': hunt[7],
-            'lucro': hunt[8],
-            'tipos_dano': json.loads(hunt[9]) if hunt[9] else [],
-            'fontes_dano': json.loads(hunt[10]) if hunt[10] else [],
-            'monstros': json.loads(hunt[11]) if hunt[11] else [],
-            'itens': json.loads(hunt[12]) if hunt[12] else [],
-            'notas': hunt[13],
-            'local_hunt': hunt[14] if len(hunt) > 14 else ''
-        }
-        hunt_list.append(hunt_dict)
-    
-    return jsonify({
-        'hunts': hunt_list,
-        'total': total,
-        'page': page,
-        'per_page': per_page,
-        'total_pages': (total + per_page - 1) // per_page
-    })
+@app.route('/api/hunts', methods=['POST'])
+def save_hunt():
+    """Salvar uma nova hunt com log bruto, processando o texto"""
+    if 'user_id' not in session:
+        return jsonify({'error': 'Usuário não autenticado'}), 401
+
+    data = request.json
+    log_text = data.get("log_text", "")
+    local_hunt = data.get("local_hunt", "")
+    notas = data.get("notas", "")
+    user_id = session['user_id']
+
+    if not log_text:
+        return jsonify({'error': 'Log da hunt é obrigatório'}), 400
+
+    try:
+        # Processar o log com parse_hunt_log
+        parsed = parse_hunt_log(log_text)
+        parsed["local_hunt"] = local_hunt
+        parsed["notas"] = notas
+
+        fields = (
+            'data', 'duracao', 'xp', 'xp_h', 'raw_xp', 'raw_xp_h',
+            'dano_causado', 'dano_sofrido', 'cura', 'lucro',
+            'tipos_dano', 'fontes_dano', 'monstros', 'itens',
+            'notas', 'local_hunt'
+        )
+        values = [parsed.get(field) for field in fields]
+
+        create_backup()
+
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        cursor.execute(f"""
+            INSERT INTO hunts (user_id, {', '.join(fields)})
+            VALUES (?, {', '.join(['?'] * len(fields))})
+        """, [user_id] + values)
+        conn.commit()
+        conn.close()
+
+        return jsonify({'success': True, 'message': 'Hunt registrada com sucesso'})
+
+    except Exception as e:
+        return jsonify({'error': f'Erro ao processar log: {str(e)}'}), 500
 
 @app.route('/api/hunts', methods=['POST'])
 def save_hunt():
