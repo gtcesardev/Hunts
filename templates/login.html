@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login - Hunt Logger</title>
+  <style>
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    form {
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+    input {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      background: #334155;
+      color: #f8fafc;
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      padding: 10px;
+      width: 100%;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    a {
+      color: #60a5fa;
+      text-decoration: none;
+      display: block;
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  
+  <form id="loginForm">
+    <h2 style="text-align:center;">Login</h2>
+    <input type="text" id="username" placeholder="Usuário" required />
+    <input type="password" id="password" placeholder="Senha" required />
+    <button type="submit">Entrar</button>
+    <a href="register.html">Criar conta</a>
+  </form>
+
+  <script>
+    // Adicione este script no login.html
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        const response = await fetch('/api/check-login');
+        const status = await response.json();
+        
+        if (status.logged_in) {
+            // Se já estiver logado, redirecionar para a página principal
+            window.location.href = '/';
+        }
+    } catch (error) {
+        console.error('Erro ao verificar login:', error);
+    }
+});
+    document.getElementById('loginForm').onsubmit = async function (e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      const result = await res.json();
+
+      if (res.ok) {
+        window.location.href = '/'; // Vai para index.html
+      } else {
+        alert(result.error || 'Erro ao fazer login');
+      }
+    };
+  </script>
+
+</div>
+</body>
+</html>
