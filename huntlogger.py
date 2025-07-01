@@ -251,15 +251,19 @@ def parse_hunt_log(text):
         # Extrações principais
         xp_gain = int(extract(r"XP Gain:\s*([\d,]+)", "0"))
         raw_xp_gain = int(extract(r"Raw XP Gain:\s*([\d,]+)", "0"))
-        session_str = extract(r"Session:\s*(\d+):(\d+)", "0:0")
-
-        h, m = map(int, session_str.split(":"))
+        h = int(extract(r"Session:\s*(\d+)", "0"))
+        m = int(extract(r"Session:\s*\d+:(\d+)", "0"))
+        
         session_minutes = max(h * 60 + m, 1)
 
         xp_h = (xp_gain * 60) // session_minutes
         raw_xp_h = (raw_xp_gain * 60) // session_minutes
 
-        monsters_killed = extract_list(r"(\d+)x ([a-zA-Z ]+)", "")
+        monsters_killed = []
+        if "Killed Monsters:" in text:
+            killed_section = text.split("Killed Monsters:")[1].split("Looted Items:")[0] if "Looted Items:" in text else text.split("Killed Monsters:")[1]
+            monsters_killed = re.findall(r"(\d+)x\s+(.+)", killed_section.strip())
+
         looted_items = []
         if "Looted Items:" in text:
             looted_items = re.findall(r"(\d+)x (a .+)", text.split("Looted Items:")[1])
