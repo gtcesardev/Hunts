@@ -350,6 +350,7 @@ def save_hunt():
 
 
 
+
 @app.route('/api/hunts/<int:hunt_id>', methods=['PUT'])
 def update_hunt(hunt_id):
     """Update an existing hunt"""
