@@ -348,37 +348,6 @@ def save_hunt():
     except Exception as e:
         return jsonify({'error': f'Erro ao processar log: {str(e)}'}), 500
 
-@app.route('/api/hunts', methods=['POST'])
-def save_hunt():
-    """Salvar uma nova hunt vinculada ao usuário autenticado"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Usuário não autenticado'}), 401
-
-    data = request.json
-    user_id = session['user_id']
-
-    fields = (
-        'data', 'duracao', 'xp', 'xp_h', 'raw_xp', 'raw_xp_h', 'dano_causado', 'dano_sofrido',
-        'cura', 'lucro', 'tipos_dano', 'fontes_dano', 'monstros', 'itens', 'notas', 'local_hunt'
-    )
-    values = [data.get(field, None) for field in fields]
-
-    try:
-        create_backup()
-
-        conn = sqlite3.connect(DB_FILE)
-        cursor = conn.cursor()
-        cursor.execute(f"""
-            INSERT INTO hunts (user_id, {', '.join(fields)})
-            VALUES (?, {', '.join(['?'] * len(fields))})
-        """, [user_id] + values)
-        conn.commit()
-        conn.close()
-
-        return jsonify({'success': True, 'message': 'Hunt registrada com sucesso'})
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/api/hunts/<int:hunt_id>', methods=['PUT'])
