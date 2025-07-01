@@ -306,6 +306,55 @@ def index():
         return redirect('/login.html')
     return render_template('index.html')
 
+@app.route('/api/hunts', methods=['GET'])
+def get_hunts():
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+        
+    try:
+        page = int(request.args.get('page', 1))
+        per_page = int(request.args.get('per_page', 10))
+        offset = (page - 1) * per_page
+
+        conn = sqlite3.connect(DB_FILE)
+        cursor = conn.cursor()
+        
+        cursor.execute("SELECT COUNT(*) FROM hunts WHERE user_id = ?", (session['user_id'],))
+        total = cursor.fetchone()[0]
+        
+        cursor.execute("""
+            SELECT id, data, duracao, xp_h, lucro, local_hunt, notas
+            FROM hunts 
+            WHERE user_id = ?
+            ORDER BY id DESC
+            LIMIT ? OFFSET ?
+        """, (session['user_id'], per_page, offset))
+        
+        hunts = []
+        for row in cursor.fetchall():
+            hunts.append({
+                'id': row[0],
+                'data': row[1],
+                'duracao': row[2],
+                'xp_h': row[3],
+                'lucro': row[4],
+                'local_hunt': row[5],
+                'notas': row[6]
+            })
+        
+        total_pages = (total + per_page - 1) // per_page
+        
+        return jsonify({
+            'hunts': hunts,
+            'page': page,
+            'total_pages': total_pages,
+            'total': total
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
 
 @app.route('/api/hunts', methods=['POST'])
 def save_hunt():
