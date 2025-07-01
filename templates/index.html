@@ -932,42 +932,43 @@ async function logout() {
 
         // Hunt management
         async function saveHunt() {
-            const logText = document.getElementById('logText').value.trim();
-            const huntLocation = document.getElementById('huntLocation').value;
-            const huntNotes = document.getElementById('huntNotes').value.trim();
+    const logText = document.getElementById('logText').value.trim();
+    const huntLocation = document.getElementById('huntLocation').value;
+    const huntNotes = document.getElementById('huntNotes').value.trim();
 
-            if (!logText) {
-                showAlert('Por favor, cole o log da hunt.', 'error');
-                return;
-            }
+    if (!logText) {
+        showAlert('Por favor, cole o log da hunt.', 'error');
+        return;
+    }
 
-            try {
-                const response = await fetch('/api/hunts', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        log_text: logText,
-                        local_hunt: huntLocation,
-                        notas: huntNotes
-                    })
-                });
+    try {
+        const response = await fetch('/api/hunts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                log_text: logText,
+                local_hunt: huntLocation,
+                notas: huntNotes
+            })
+        });
 
-                const result = await response.json();
+        const result = await response.json();
 
-                if (response.ok) {
-                    showAlert(result.message, 'success');
-                    clearForm();
-                    loadStatistics();
-                    loadHunts();
-                } else {
-                    showAlert(result.error, 'error');
-                }
-            } catch (error) {
-                showAlert('Erro ao salvar hunt: ' + error.message, 'error');
-            }
+        if (response.ok) {
+            showAlert('Hunt salva com sucesso!', 'success');
+            clearForm();
+            loadHunts(); // atualizar histórico
+        } else {
+            showAlert(result.error || 'Erro ao salvar hunt.', 'error');
         }
+    } catch (error) {
+        showAlert('Erro ao enviar hunt para o servidor.', 'error');
+        console.error(error);
+    }
+}
+
 
         async function loadHunts(page = 1) {
             currentPage = page;
