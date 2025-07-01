@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import shutil
 from werkzeug.utils import secure_filename
 import hashlib
-from huntlogger import init_db
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
