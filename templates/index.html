@@ -3,1444 +3,454 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Primo Guto - Elder Druid</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Hunt Logger</title>
     <style>
-        :root {
-            --primary-color: #2563eb;
-            --primary-dark: #1d4ed8;
-            --secondary-color: #64748b;
-            --success-color: #059669;
-            --danger-color: #dc2626;
-            --warning-color: #d97706;
-            --dark-bg: #0f172a;
-            --card-bg: #1e293b;
-            --card-hover: #334155;
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --border-color: #475569;
-            --input-bg: #334155;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc; min-height: 100vh;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--dark-bg) 0%, #1e293b 100%);
-            color: var(--text-primary);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        }
-
-        .header h1 {
-            color: var(--primary-color);
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border: 1px solid var(--border-color);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
-
-        .stat-card .icon {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            color: var(--primary-color);
-        }
-
-        .stat-card .value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .stat-card .label {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 5px;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 15px 20px;
-            text-align: center;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { font-size: 2.5rem; margin-bottom: 10px; display: inline-block; background: linear-gradient(45deg, #60a5fa, #34d399);background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        .nav button { 
+            padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;
+            background: #334155; color: #f8fafc; transition: all 0.3s;
             font-weight: 500;
         }
-
-        .tab.active {
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
+        .nav button.active, .nav button:hover { background: #60a5fa; }
+        .card { 
+            background: #1e293b; border-radius: 12px; padding: 24px; margin-bottom: 20px;
+            border: 1px solid #334155; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
         }
-
-        .tab:not(.active):hover {
-            background: var(--card-hover);
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #cbd5e1; }
+        .form-group input, .form-group textarea, .form-group select { 
+            width: 100%; padding: 12px; border: 1px solid #475569; border-radius: 8px;
+            background: #334155; color: #f8fafc; font-size: 14px;
         }
-
-        .tab-content {
-            display: none;
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        .form-group textarea { height: 120px; resize: vertical; }
+        .btn { 
+            padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;
+            font-weight: 500; transition: all 0.3s; text-decoration: none; display: inline-block;
         }
-
-        .tab-content.active {
-            display: block;
+        .btn-primary { background: #3b82f6; color: white; }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-small { padding: 8px 16px; font-size: 12px; }
+        .hunt-item { 
+            background: #334155; border-radius: 8px; padding: 16px; margin-bottom: 12px;
+            border-left: 4px solid #60a5fa;
         }
-
-        .form-group {
-            margin-bottom: 20px;
+        .hunt-header { display: flex; justify-content: between; align-items: center; margin-bottom: 12px; }
+        .hunt-title { font-weight: 600; color: #60a5fa; }
+        .hunt-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+        .stat { text-align: center; }
+        .stat-value { font-size: 1.2rem; font-weight: 600; color: #34d399; }
+        .stat-label { font-size: 0.8rem; color: #94a3b8; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
+        .pagination button { 
+            padding: 8px 12px; border: 1px solid #475569; background: #334155; color: #f8fafc;
+            border-radius: 6px; cursor: pointer;
         }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text-primary);
+        .pagination button.active { background: #60a5fa; border-color: #60a5fa; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; }
+        .modal-content { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #1e293b; border-radius: 12px; padding: 24px; width: 90%; max-width: 500px;
         }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 16px;
-            background: var(--input-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 14px;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        .close { float: right; font-size: 24px; cursor: pointer; color: #94a3b8; }
+        .close:hover { color: #f8fafc; }
+        .hidden { display: none; }
+        .user-info { text-align: right; margin-bottom: 20px; }
+        .user-info span { margin-right: 15px; color: #94a3b8; }
+        .loading { text-align: center; padding: 40px; color: #94a3b8; }
+        .video-upload { margin-top: 12px; }
+        .video-upload input[type="file"] { 
+            padding: 8px; background: #475569; border: 1px dashed #60a5fa; 
+            border-radius: 6px; cursor: pointer;
         }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        .video-player { margin-top: 12px; }
+        .video-player video { 
+            width: 100%; max-width: 400px; border-radius: 8px; 
+            background: #000; border: 1px solid #475569;
         }
-
-        textarea.form-control {
-            min-height: 120px;
-            resize: vertical;
+        .upload-btn { 
+            padding: 6px 12px; font-size: 12px; margin-top: 8px; 
+            background: #8b5cf6; color: white; border: none; border-radius: 4px; cursor: pointer;
         }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-        }
-
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
-        }
-
-        .btn-success {
-            background: var(--success-color);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #047857;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: var(--danger-color);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #b91c1c;
-            transform: translateY(-2px);
-        }
-
-        .btn-warning {
-            background: var(--warning-color);
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background: #b45309;
-            transform: translateY(-2px);
-        }
-
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 12px;
-        }
-
-        .filters {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-            padding: 20px;
-            background: var(--input-bg);
-            border-radius: 8px;
-        }
-
-        .table-container {
-            overflow-x: auto;
-            border-radius: 12px;
-            background: var(--card-bg);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .table th,
-        .table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .table th {
-            background: var(--input-bg);
-            font-weight: 600;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .table th:hover {
-            background: var(--card-hover);
-        }
-
-        .table tr:hover {
-            background: var(--input-bg);
-        }
-
-        .table td {
-            color: var(--text-secondary);
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-top: 20px;
-            padding: 20px;
-        }
-
-        .pagination button {
-            padding: 8px 12px;
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .pagination button:hover:not(:disabled) {
-            background: var(--primary-color);
-        }
-
-        .pagination button.active {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-
-        .pagination button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .alert-success {
-            background: rgba(5, 150, 105, 0.1);
-            color: #10b981;
-            border: 1px solid #10b981;
-        }
-
-        .alert-error {
-            background: rgba(220, 38, 38, 0.1);
-            color: #f87171;
-            border: 1px solid #f87171;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.7);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal-content {
-            background: var(--card-bg);
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 600px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-            position: relative;
-            animation: modalSlideIn 0.3s ease;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .close {
-            position: absolute;
-            right: 20px;
-            top: 15px;
-            color: var(--text-secondary);
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .close:hover {
-            color: var(--danger-color);
-        }
-
-        .catalog-grid {
-            display: grid;
-            gap: 20px;
-        }
-
-        .level-section {
-            background: var(--input-bg);
-            border-radius: 8px;
-            padding: 20px;
-        }
-
-        .level-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .hunt-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 10px;
-        }
-
-        .hunt-item {
-            background: var(--card-bg);
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-
-        .hunt-item:hover {
-            background: var(--card-hover);
-            transform: translateX(5px);
-        }
-
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--border-color);
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .export-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: var(--input-bg);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary-color), var(--success-color));
-            transition: width 0.3s ease;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                gap: 15px;
-            }
-            
-            .filters {
-                grid-template-columns: 1fr;
-            }
-            
-            .tabs {
-                flex-direction: column;
-            }
-            
-            .export-buttons {
-                flex-direction: column;
-            }
-            
-            .modal-content {
-                width: 95%;
-                margin: 10% auto;
-                padding: 20px;
-            }
-        }
+        .upload-btn:hover { background: #7c3aed; }
+        .upload-btn:disabled { background: #6b7280; cursor: not-allowed; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
-        <!-- Modifique o header para incluir informações de login -->
-<div class="header">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <h1><i class="fas fa-dragon"></i> Primo Guto - Elder Druid</h1>
-            <p> Registro e análise de hunts</p>
+        <div class="user-info">
+            <span id="username-display"></span>
+            <button class="btn btn-danger btn-small" onclick="logout()">Sair</button>
         </div>
-        <div id="login-info" style="display: none;">
-            <span id="username-display" style="margin-right: 15px;"></span>
-            <button class="btn btn-danger" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> Sair
-            </button>
-        </div>
-    </div>
-</div>
 
-        <!-- Statistics Cards -->
-        <div class="stats-grid" id="statsGrid">
-            <div class="stat-card">
-                <div class="icon"><i class="fas fa-trophy"></i></div>
-                <div class="value" id="totalHunts">-</div>
-                <div class="label">Total de Hunts</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon"><i class="fas fa-star"></i></div>
-                <div class="value" id="totalXp">-</div>
-                <div class="label">XP Total</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon"><i class="fas fa-chart-line"></i></div>
-                <div class="value" id="avgXpH">-</div>
-                <div class="label">Média XP/h</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon"><i class="fas fa-coins"></i></div>
-                <div class="value" id="totalProfit">-</div>
-                <div class="label">Lucro Total</div>
+        <div class="header">
+            <h1>Primo Guto</h1>
+            <p>Registros de Hunt</p>
+        </div>
+
+        <div class="nav">
+            <button class="active" onclick="showSection('hunts')">Hunts</button>
+            <button onclick="showSection('new-hunt')">Nova Hunt</button>
+            <button onclick="showSection('statistics')">Estatísticas</button>
+        </div>
+
+        <!-- Seção Nova Hunt -->
+        <div id="new-hunt-section" class="hidden">
+            <div class="card">
+                <h3>Registrar Nova Hunt</h3>
+                <form id="hunt-form">
+                    <div class="form-group">
+                        <label>Local da Hunt</label>
+                        <input type="text" id="local-hunt" placeholder="Ex: Glooth Bandits, Roshamuul..." list="locations-list" required>
+                        <datalist id="locations-list"></datalist>
+                    </div>
+                    <div class="form-group">
+                        <label>Log do Hunt Analyser</label>
+                        <textarea id="log-text" placeholder="Cole aqui o log completo do Hunt Analyser..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Notas (opcional)</label>
+                        <textarea id="notas" placeholder="Observações sobre a hunt..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Registrar Hunt</button>
+                </form>
             </div>
         </div>
 
-        <!-- Tabs -->
-        <div class="tabs">
-            <div class="tab active" onclick="showTab('register')">
-                <i class="fas fa-plus"></i> Registrar Hunt
-            </div>
-            <div class="tab" onclick="showTab('history')">
-                <i class="fas fa-history"></i> Histórico
-            </div>
-            <div class="tab" onclick="showTab('catalog')">
-                <i class="fas fa-book"></i> Catálogo de Hunts
-            </div>
-            <div class="tab" onclick="showTab('analytics')">
-                <i class="fas fa-chart-bar"></i> Análises
+        <!-- Seção Hunts -->
+        <div id="hunts-section">
+            <div class="card">
+                <h3>Minhas Hunts</h3>
+                <div id="hunts-loading" class="loading">Carregando...</div>
+                <div id="hunts-list"></div>
+                <div id="pagination"></div>
             </div>
         </div>
 
-        <!-- Register Tab -->
-        <div id="register" class="tab-content active">
-            <h2><i class="fas fa-scroll"></i> Registrar Nova Hunt</h2>
-            
-            <div class="form-group">
-                <label for="logText">Cole o log da hunt:</label>
-                <textarea id="logText" class="form-control" placeholder="Cole aqui o log completo da hunt..."></textarea>
-            </div>
-
-            <div class="form-group">
-                <label for="huntLocation">Local da Hunt:</label>
-                <select id="huntLocation" class="form-control">
-                    <option value="">Selecione o local da hunt...</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="huntNotes">Observações:</label>
-                <textarea id="huntNotes" class="form-control" placeholder="Observações sobre a hunt..."></textarea>
-            </div>
-
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="btn btn-primary" onclick="saveHunt()">
-                    <i class="fas fa-save"></i> Salvar Hunt
-                </button>
-                <button class="btn btn-warning" onclick="clearForm()">
-                    <i class="fas fa-eraser"></i> Limpar
-                </button>
-            </div>
-        </div>
-
-        <!-- History Tab -->
-        <div id="history" class="tab-content">
-            <h2><i class="fas fa-history"></i> Histórico de Hunts</h2>
-            
-            <!-- Filters -->
-            <div class="filters">
-                <div class="form-group">
-                    <label>Data Inicial:</label>
-                    <input type="date" id="filterDateFrom" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Data Final:</label>
-                    <input type="date" id="filterDateTo" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>XP/h Mínimo:</label>
-                    <input type="number" id="filterMinXpH" class="form-control" placeholder="0">
-                </div>
-                <div class="form-group">
-                    <label>Lucro Mínimo:</label>
-                    <input type="number" id="filterMinProfit" class="form-control" placeholder="0">
-                </div>
-                <div class="form-group">
-                    <label>Local:</label>
-                    <input type="text" id="filterLocation" class="form-control" placeholder="Filtrar por local...">
-                </div>
-                <div class="form-group" style="display: flex; align-items: end;">
-                    <button class="btn btn-primary" onclick="applyFilters()">
-                        <i class="fas fa-filter"></i> Filtrar
-                    </button>
-                </div>
-            </div>
-
-            <!-- Export Buttons -->
-            <div class="export-buttons">
-                <button class="btn btn-success" onclick="exportData('csv')">
-                    <i class="fas fa-file-csv"></i> Exportar CSV
-                </button>
-                <button class="btn btn-success" onclick="exportData('excel')">
-                    <i class="fas fa-file-excel"></i> Exportar Excel
-                </button>
-                <button class="btn btn-success" onclick="exportData('txt')">
-                    <i class="fas fa-file-alt"></i> Exportar TXT
-                </button>
-            </div>
-
-            <!-- Table -->
-            <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th onclick="sortTable('id')">ID <i class="fas fa-sort"></i></th>
-                            <th onclick="sortTable('data')">Data <i class="fas fa-sort"></i></th>
-                            <th onclick="sortTable('duracao')">Duração <i class="fas fa-sort"></i></th>
-                            <th onclick="sortTable('xp_h')">XP/h <i class="fas fa-sort"></i></th>
-                            <th onclick="sortTable('lucro')">Lucro <i class="fas fa-sort"></i></th>
-                            <th onclick="sortTable('local_hunt')">Local <i class="fas fa-sort"></i></th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="huntsTableBody">
-                        <tr>
-                            <td colspan="7" class="loading">
-                                <div class="spinner"></div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            <div class="pagination" id="pagination"></div>
-        </div>
-
-        <!-- Catalog Tab -->
-        <div id="catalog" class="tab-content">
-            <h2><i class="fas fa-book"></i> Catálogo de Hunts</h2>
-            
-            <div style="margin-bottom: 20px;">
-                <button class="btn btn-primary" onclick="showAddHuntModal()">
-                    <i class="fas fa-plus"></i> Adicionar Nova Hunt ao Catálogo
-                </button>
-            </div>
-
-            <div id="catalogContainer" class="catalog-grid">
-                <div class="loading">
-                    <div class="spinner"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Analytics Tab -->
-        <div id="analytics" class="tab-content">
-            <h2><i class="fas fa-chart-bar"></i> Análises e Estatísticas</h2>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="icon"><i class="fas fa-fire"></i></div>
-                    <div class="value" id="maxXpH">-</div>
-                    <div class="label">Maior XP/h</div>
-                </div>
-                <div class="stat-card">
-                    <div class="icon"><i class="fas fa-gem"></i></div>
-                    <div class="value" id="maxProfit">-</div>
-                    <div class="label">Maior Lucro</div>
-                </div>
-                <div class="stat-card">
-                    <div class="icon"><i class="fas fa-calendar-week"></i></div>
-                    <div class="value" id="recentAvgXpH">-</div>
-                    <div class="label">Média XP/h (7 dias)</div>
-                </div>
-                <div class="stat-card">
-                    <div class="icon"><i class="fas fa-coins"></i></div>
-                    <div class="value" id="recentAvgProfit">-</div>
-                    <div class="label">Média Lucro (7 dias)</div>
-                </div>
-            </div>
-
-            <!-- Monthly Progress Chart placeholder -->
-            <div style="margin-top: 30px; padding: 20px; background: var(--card-bg); border-radius: 12px;">
-                <h3>Progressão Mensal</h3>
-                <div id="monthlyChart" style="height: 300px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
-                    <i class="fas fa-chart-area" style="font-size: 3rem; margin-right: 20px;"></i>
-                    Gráfico de progressão será implementado em breve
-                </div>
+        <!-- Seção Estatísticas -->
+        <div id="statistics-section" class="hidden">
+            <div class="card">
+                <h3>Estatísticas</h3>
+                <div id="stats-loading" class="loading">Carregando...</div>
+                <div id="stats-content"></div>
             </div>
         </div>
     </div>
 
-    <!-- Modals -->
-    <!-- Add Hunt to Catalog Modal -->
-    <div id="addHuntModal" class="modal">
+    <!-- Modal para editar hunt -->
+    <div id="edit-modal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal('addHuntModal')">&times;</span>
-            <h3>Adicionar Hunt ao Catálogo</h3>
-            
-            <div class="form-group">
-                <label>Vocação:</label>
-                <select id="modalVocation" class="form-control">
-                    <option value="ED">Elder Druid</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label>Level Recomendado:</label>
-                <input type="number" id="modalLevel" class="form-control" min="1" max="1000">
-            </div>
-            
-            <div class="form-group">
-                <label>Nome da Hunt:</label>
-                <input type="text" id="modalHuntName" class="form-control" placeholder="Ex: Oramond West">
-            </div>
-            
-            <div class="form-group">
-                <label>Descrição (opcional):</label>
-                <textarea id="modalDescription" class="form-control" placeholder="Descrição detalhada da hunt..."></textarea>
-            </div>
-            
-            <div style="display: flex; gap: 10px; justify-content: end;">
-                <button class="btn btn-primary" onclick="addHuntToCatalog()">
-                    <i class="fas fa-plus"></i> Adicionar
-                </button>
-                <button class="btn" onclick="closeModal('addHuntModal')" style="background: var(--secondary-color);">
-                    Cancelar
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Hunt Modal -->
-    <div id="editHuntModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('editHuntModal')">&times;</span>
+            <span class="close" onclick="closeModal()">&times;</span>
             <h3>Editar Hunt</h3>
-            
-            <input type="hidden" id="editHuntId">
-            
-            <div class="form-group">
-                <label>XP Obtido:</label>
-                <input type="number" id="editXp" class="form-control">
-            </div>
-            
-            <div class="form-group">
-                <label>XP/h:</label>
-                <input type="number" id="editXpH" class="form-control">
-            </div>
-            
-            <div class="form-group">
-                <label>Lucro:</label>
-                <input type="number" id="editLucro" class="form-control">
-            </div>
-            
-            <div class="form-group">
-                <label>Local:</label>
-                <input type="text" id="editLocal" class="form-control">
-            </div>
-            
-            <div class="form-group">
-                <label>Observações:</label>
-                <textarea id="editNotas" class="form-control"></textarea>
-            </div>
-            
-            <div style="display: flex; gap: 10px; justify-content: end;">
-                <button class="btn btn-primary" onclick="updateHunt()">
-                    <i class="fas fa-save"></i> Salvar
-                </button>
-                <button class="btn" onclick="closeModal('editHuntModal')" style="background: var(--secondary-color);">
-                    Cancelar
-                </button>
-            </div>
+            <form id="edit-form">
+                <div class="form-group">
+                    <label>Local da Hunt</label>
+                    <input type="text" id="edit-local" required>
+                </div>
+                <div class="form-group">
+                    <label>Notas</label>
+                    <textarea id="edit-notas"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </form>
         </div>
     </div>
 
     <script>
-        // Global variables
         let currentPage = 1;
-        let currentSort = { field: 'id', direction: 'desc' };
-        let huntsData = [];
-        let catalogData = {};
+        let currentEditId = null;
 
-        // Initialize app
-        document.addEventListener('DOMContentLoaded', function() {
-            checkLoginStatus();
-            loadStatistics();
-            loadHuntCatalog();
-            loadHunts();
-            carregarLocaisDeHunt();
-        });
-    
-      async function checkLoginStatus() {
-    try {
-        const response = await fetch('/api/check-login');
-        const status = await response.json();
-        
-        if (status.logged_in) {
-            document.getElementById('login-info').style.display = 'block';
-            document.getElementById('username-display').textContent = `Logado como: ${status.username}`;
-        } else {
-            // Redireciona imediatamente para login
+        // Verificar login
+        async function checkLogin() {
+            const response = await fetch('/api/check-login');
+            const data = await response.json();
+            if (!data.logged_in) {
+                window.location.href = '/login.html';
+                return false;
+            }
+            document.getElementById('username-display').textContent = `Olá, ${data.username}`;
+            return true;
+        }
+
+        // Logout
+        async function logout() {
+            await fetch('/api/logout', { method: 'POST' });
             window.location.href = '/login.html';
         }
-    } catch (error) {
-        console.error('Erro ao verificar login:', error);
-        // Redireciona em caso de erro também
-        window.location.href = '/login.html';
-    }
-}
 
-async function logout() {
-    try {
-        const response = await fetch('/api/logout', {
-            method: 'POST'
-        });
-        
-        const result = await response.json();
-        if (response.ok) {
-            // Redireciona manualmente para a página de login
-            window.location.href = '/login.html';
-        } else {
-            showAlert(result.error || 'Erro ao fazer logout', 'error');
-        }
-    } catch (error) {
-        // Em caso de erro, redireciona mesmo assim
-        window.location.href = '/login.html';
-    }
-}
-        
-
-      async function carregarLocaisDeHunt() {
-  try {
-    const res = await fetch('/api/catalog-locations');
-    const locais = await res.json();
-    const select = document.getElementById('huntLocation');
-    
-    // Limpar e adicionar opções
-    select.innerHTML = '<option value="">Selecione um local</option>';
-    locais.forEach(local => {
-      const opt = document.createElement('option');
-      opt.value = local;
-      opt.textContent = local;
-      select.appendChild(opt);
-    });
-    
-  } catch (e) {
-    console.error('Erro ao carregar locais do catálogo:', e);
-    showAlert('Erro ao carregar locais de hunt', 'error');
-  }
-}
-
-
-        // Tab management
-        function showTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-
-            // Show selected tab
-            document.getElementById(tabName).classList.add('active');
+        // Mostrar seção
+        function showSection(section) {
+            document.querySelectorAll('.nav button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('[id$="-section"]').forEach(sec => sec.classList.add('hidden'));
+            
             event.target.classList.add('active');
-
-            // Load data based on tab
-            if (tabName === 'history') {
-                loadHunts();
-            } else if (tabName === 'catalog') {
-                loadHuntCatalog();
-            } else if (tabName === 'analytics') {
-                loadStatistics();
-            }
+            document.getElementById(section + '-section').classList.remove('hidden');
+            
+            if (section === 'hunts') loadHunts();
+            if (section === 'statistics') loadStatistics();
+            if (section === 'new-hunt') loadLocations();
         }
 
-        // Statistics
-        async function loadStatistics() {
-            try {
-                const response = await fetch('/api/statistics');
-                const stats = await response.json();
-
-                document.getElementById('totalHunts').textContent = stats.total_hunts.toLocaleString();
-                document.getElementById('totalXp').textContent = stats.total_xp.toLocaleString();
-                document.getElementById('avgXpH').textContent = stats.avg_xp_h.toLocaleString();
-                document.getElementById('totalProfit').textContent = stats.total_profit.toLocaleString() + ' gp';
-                
-                // Analytics tab stats
-                if (document.getElementById('maxXpH')) {
-                    document.getElementById('maxXpH').textContent = stats.max_xp_h.toLocaleString();
-                    document.getElementById('maxProfit').textContent = stats.max_profit.toLocaleString() + ' gp';
-                    document.getElementById('recentAvgXpH').textContent = stats.recent_avg_xp_h.toLocaleString();
-                    document.getElementById('recentAvgProfit').textContent = stats.recent_avg_profit.toLocaleString() + ' gp';
-                }
-            } catch (error) {
-                console.error('Error loading statistics:', error);
-            }
+        // Carregar locais
+        async function loadLocations() {
+            const response = await fetch('/api/hunt-locations');
+            const locations = await response.json();
+            const datalist = document.getElementById('locations-list');
+            datalist.innerHTML = locations.map(loc => `<option value="${loc}">`).join('');
         }
 
-        // Hunt management
-        async function saveHunt() {
-    const logText = document.getElementById('logText').value.trim();
-    const huntLocation = document.getElementById('huntLocation').value;
-    const huntNotes = document.getElementById('huntNotes').value.trim();
-
-    if (!logText) {
-        showAlert('Por favor, cole o log da hunt.', 'error');
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/hunts', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include', // Adicione esta linha
-    body: JSON.stringify({
-        log_text: logText,
-        local_hunt: huntLocation,
-        notas: huntNotes
-            })
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            showAlert('Hunt salva com sucesso!', 'success');
-            clearForm();
-            loadHunts(); // atualizar histórico
-        } else {
-            showAlert(result.error || 'Erro ao salvar hunt.', 'error');
-        }
-    } catch (error) {
-        showAlert('Erro ao enviar hunt para o servidor.', 'error');
-        console.error(error);
-    }
-}
-
-
+        // Carregar hunts
         async function loadHunts(page = 1) {
-    try {
-        const response = await fetch(`/api/hunts?page=${page}`, {
-            credentials: 'include'
-        });
-        
-        if (!response.ok) {
-            throw new Error('Erro ao carregar hunts');
-        }
-        
-        const data = await response.json();
-        displayHunts(data.hunts);
-        updatePagination(data.page, data.total_pages, data.total);
-        
-    } catch (error) {
-        console.error('Error loading hunts:', error);
-        showAlert(error.message, 'error');
-    }
-}
-
-        function displayHunts(hunts) {
-            const tbody = document.getElementById('huntsTableBody');
+            document.getElementById('hunts-loading').style.display = 'block';
+            const response = await fetch(`/api/hunts?page=${page}&per_page=10`);
+            const data = await response.json();
             
-            if (hunts.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-secondary);">Nenhuma hunt encontrada</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = hunts.map(hunt => `
-                <tr>
-                    <td>${hunt.id}</td>
-                    <td>${hunt.data}</td>
-                    <td>${hunt.duracao}</td>
-                    <td style="color: var(--success-color); font-weight: bold;">${hunt.xp_h.toLocaleString()}</td>
-                    <td style="color: ${hunt.lucro >= 0 ? 'var(--success-color)' : 'var(--danger-color)'}; font-weight: bold;">
-                        ${hunt.lucro.toLocaleString()} gp
-                    </td>
-                    <td>${hunt.local_hunt || '-'}</td>
-                    <td>
-                        <button class="btn btn-sm btn-primary" onclick="editHunt(${hunt.id})" title="Editar">
-                            <i class="fas fa-edit"></i>
-                            </button>
-                       <button class="btn btn-sm btn-danger" onclick="deleteHunt(${hunt.id})" title="Remover">
-                        <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function updatePagination(currentPage, totalPages, totalItems) {
-            const pagination = document.getElementById('pagination');
+            document.getElementById('hunts-loading').style.display = 'none';
             
-            if (totalPages <= 1) {
-                pagination.innerHTML = '';
-                return;
-            }
-
-            let paginationHTML = `
-                <button onclick="loadHunts(1)" ${currentPage === 1 ? 'disabled' : ''}>
-                    <i class="fas fa-angle-double-left"></i>
-                </button>
-                <button onclick="loadHunts(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
-                    <i class="fas fa-angle-left"></i>
-                </button>
-            `;
-
-            // Page numbers
-            const startPage = Math.max(1, currentPage - 2);
-            const endPage = Math.min(totalPages, currentPage + 2);
-            
-            for (let i = startPage; i <= endPage; i++) {
-                paginationHTML += `
-                    <button onclick="loadHunts(${i})" ${i === currentPage ? 'class="active"' : ''}>
-                        ${i}
-                    </button>
-                `;
-            }
-
-            paginationHTML += `
-                <button onclick="loadHunts(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
-                    <i class="fas fa-angle-right"></i>
-                </button>
-                <button onclick="loadHunts(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>
-                    <i class="fas fa-angle-double-right"></i>
-                </button>
-                <span style="margin-left: 20px; color: var(--text-secondary);">
-                    Total: ${totalItems} hunts
-                </span>
-            `;
-
-            pagination.innerHTML = paginationHTML;
-        }
-
-        // Hunt catalog
-        async function loadHuntCatalog() {
-            try {
-                const response = await fetch('/api/hunt-catalog');
-                const catalog = await response.json();
-                
-                catalogData = catalog;
-                displayCatalog(catalog);
-                
-                // Populate location select
-                
-                
-                
-            } catch (error) {
-                console.error('Error loading hunt catalog:', error);
-            }
-        }
-
-        function displayCatalog(catalog) {
-            const container = document.getElementById('catalogContainer');
-            
-            if (Object.keys(catalog).length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Nenhuma hunt no catálogo</p>';
-                return;
-            }
-
-            container.innerHTML = Object.entries(catalog).map(([vocation, levels]) =>
-    Object.entries(levels).map(([level, hunts]) => `
-        <div class="level-section">
-            <div class="level-title">
-                <i class="fas fa-star"></i> ${vocation} - Level ${level}+
-            </div>
-            <div class="hunt-list">
-                ${hunts.map(hunt => `
-                    <div class="hunt-item">
+            const huntsList = document.getElementById('hunts-list');
+            huntsList.innerHTML = data.hunts.map(hunt => `
+                <div class="hunt-item">
+                    <div class="hunt-header">
+                        <div class="hunt-title">${hunt.local_hunt} - ${hunt.data}</div>
                         <div>
-                            <strong>${hunt.name}</strong>
-                            ${hunt.description ? `<br><small style="color: var(--text-secondary);">${hunt.description}</small>` : ''}
+                            <button class="btn btn-primary btn-small" onclick="editHunt(${hunt.id})">Editar</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteHunt(${hunt.id})">Excluir</button>
                         </div>
-                        <button class="btn btn-sm btn-danger" onclick="removeFromCatalog('${hunt.id}')" title="Remover">
-                            <i class="fas fa-trash"></i>
-                        </button>
                     </div>
-                `).join('')}
-            </div>
-        </div>
-    `).join('')
-).join('');
-
-        }
-
-        async function deleteHunt(huntId) {
-    if (!confirm('Tem certeza que deseja excluir esta hunt?')) return;
-
-    try {
-        const response = await fetch(`/api/hunts/${huntId}`, {
-            method: 'DELETE',
-            credentials: 'include'
-        });
-
-        if (response.ok) {
-            showAlert('Hunt excluída!', 'success');
-            loadHunts(currentPage);
-        } else {
-            const error = await response.json();
-            showAlert(error.error, 'error');
-        }
-    } catch (error) {
-        showAlert('Erro ao excluir hunt', 'error');
-    }
-}
-
-function clearForm() {
-    document.getElementById('logText').value = '';
-    document.getElementById('huntLocation').value = '';
-    document.getElementById('huntNotes').value = '';
-}
-
-
-
-
-        async function addHuntToCatalog() {
-            const vocation = document.getElementById('modalVocation').value;
-            const level = document.getElementById('modalLevel').value;
-            const name = document.getElementById('modalHuntName').value.trim();
-            const description = document.getElementById('modalDescription').value.trim();
-
-            if (!level || !name) {
-                showAlert('Preencha todos os campos obrigatórios', 'error');
-                return;
+                    <div class="hunt-stats">
+                        <div class="stat">
+                            <div class="stat-value">${hunt.xp_h.toLocaleString()}</div>
+                            <div class="stat-label">XP/h</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${hunt.xp.toLocaleString()}</div>
+                            <div class="stat-label">XP Total</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${hunt.lucro.toLocaleString()}</div>
+                            <div class="stat-label">Lucro</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${hunt.duracao}</div>
+                            <div class="stat-label">Duração</div>
+                        </div>
+                    </div>
+                    ${hunt.notas ? `<div style="margin-top: 12px; color: #cbd5e1;"><strong>Notas:</strong> ${hunt.notas}</div>` : ''}
+                    <div class="video-upload">
+                        ${hunt.video_filename ? `
+                            <div class="video-player">
+                                <video controls>
+                                    <source src="/api/video/${hunt.video_filename}" type="video/mp4">
+                                    Seu navegador não suporta vídeos.
+                                </video>
+                            </div>
+                        ` : `
+                            <div>
+                                <input type="file" id="video-${hunt.id}" accept="video/*" style="display: none;" onchange="showUploadButton(${hunt.id})">
+                                <button class="upload-btn" onclick="document.getElementById('video-${hunt.id}').click()">
+                                    📹 Adicionar Vídeo
+                                </button>
+                                <button class="upload-btn" id="upload-${hunt.id}" onclick="uploadVideo(${hunt.id})" style="display: none;">
+                                    ⬆️ Enviar
+                                </button>
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `).join('');
+            
+            // Paginação
+            const pagination = document.getElementById('pagination');
+            const pages = [];
+            for (let i = 1; i <= data.total_pages; i++) {
+                pages.push(`<button class="${i === page ? 'active' : ''}" onclick="loadHunts(${i})">${i}</button>`);
             }
-
-            try {
-                const response = await fetch('/api/hunt-catalog', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        vocation,
-                        level: parseInt(level),
-                        hunt_name:name,
-                        description
-                    })
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    showAlert('Hunt adicionada ao catálogo com sucesso!', 'success');
-                    closeModal('addHuntModal');
-                    loadHuntCatalog();
-                    clearCatalogForm();
-                } else {
-                    showAlert(result.error, 'error');
-                }
-            } catch (error) {
-                showAlert('Erro ao adicionar hunt ao catálogo', 'error');
-            }
+            pagination.innerHTML = pages.join('');
         }
 
-        async function removeFromCatalog(catalogId) {
-    if (!confirm(`Tem certeza que deseja remover esta hunt do catálogo?`)) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`/api/hunt-catalog/${catalogId}`, {
-            method: 'DELETE'
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            showAlert('Hunt removida do catálogo', 'success');
-            loadHuntCatalog();
-        } else {
-            showAlert(result.error, 'error');
-        }
-    } catch (error) {
-        showAlert('Erro ao remover hunt do catálogo', 'error');
-    }
-}
-
-        // Hunt editing
-        async function editHunt(huntId) {
-            try {
-                const response = await fetch(`/api/hunts/${huntId}`);
-                const hunt = await response.json();
-
-                document.getElementById('editHuntId').value = hunt.id;
-                document.getElementById('editXp').value = hunt.xp_obtido;
-                document.getElementById('editXpH').value = hunt.xp_h;
-                document.getElementById('editLucro').value = hunt.lucro;
-                document.getElementById('editLocal').value = hunt.local_hunt || '';
-                document.getElementById('editNotas').value = hunt.notas || '';
-
-                document.getElementById('editHuntModal').style.display = 'block';
-            } catch (error) {
-                showAlert('Erro ao carregar dados da hunt', 'error');
-            }
-        }
-
-        async function updateHunt() {
-            const huntId = document.getElementById('editHuntId').value;
-            const data = {
-                xp_obtido: parseInt(document.getElementById('editXp').value),
-                xp_h: parseInt(document.getElementById('editXpH').value),
-                lucro: parseInt(document.getElementById('editLucro').value),
-                local_hunt: document.getElementById('editLocal').value.trim(),
-                notas: document.getElementById('editNotas').value.trim()
-            };
-
-            try {
-                const response = await fetch(`/api/hunts/${huntId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    showAlert('Hunt atualizada com sucesso!', 'success');
-                    closeModal('editHuntModal');
-                    loadHunts(currentPage);
-                    loadStatistics();
-                } else {
-                    showAlert(result.error, 'error');
-                }
-            } catch (error) {
-                showAlert('Erro ao atualizar hunt', 'error');
-            }
-        }
-
-        
-
-        // Export functions
-        async function exportData(format) {
-            try {
-                const response = await fetch(`/api/export/${format}`);
-                
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `hunt_data.${format}`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                    
-                    showAlert(`Dados exportados em ${format.toUpperCase()}!`, 'success');
-                } else {
-                    showAlert('Erro ao exportar dados', 'error');
-                }
-            } catch (error) {
-                showAlert('Erro ao exportar dados', 'error');
-            }
-        }
-
-        // Modal management
-        function showAddHuntModal() {
-            document.getElementById('addHuntModal').style.display = 'block';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
-            }
-        }
-
-        // Form management
-        function clearForm() {
-            document.getElementById('logText').value = '';
-            document.getElementById('huntLocation').value = '';
-            document.getElementById('huntNotes').value = '';
-        }
-
-        function clearCatalogForm() {
-            document.getElementById('modalLevel').value = '';
-            document.getElementById('modalHuntName').value = '';
-            document.getElementById('modalDescription').value = '';
-        }
-
-        // Alert system
-        function showAlert(message, type = 'success') {
-            // Remove existing alerts
-            const existingAlert = document.querySelector('.alert');
-            if (existingAlert) {
-                existingAlert.remove();
-            }
-
-            const alert = document.createElement('div');
-            alert.className = `alert alert-${type === 'success' ? 'success' : 'error'}`;
-            alert.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
-                ${message}
+        // Carregar estatísticas
+        async function loadStatistics() {
+            document.getElementById('stats-loading').style.display = 'block';
+            const response = await fetch('/api/statistics');
+            const stats = await response.json();
+            
+            document.getElementById('stats-loading').style.display = 'none';
+            
+            document.getElementById('stats-content').innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat">
+                        <div class="stat-value">${stats.total_hunts}</div>
+                        <div class="stat-label">Total de Hunts</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${stats.total_xp.toLocaleString()}</div>
+                        <div class="stat-label">XP Total</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${stats.avg_xp_h.toLocaleString()}</div>
+                        <div class="stat-label">XP/h Médio</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${stats.max_xp_h.toLocaleString()}</div>
+                        <div class="stat-label">Melhor XP/h</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${stats.total_profit.toLocaleString()}</div>
+                        <div class="stat-label">Lucro Total</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">${stats.avg_profit.toLocaleString()}</div>
+                        <div class="stat-label">Lucro Médio</div>
+                    </div>
+                </div>
+                ${stats.top_locations.length > 0 ? `
+                    <h4 style="margin: 24px 0 12px 0;">Melhores Locais por XP/h</h4>
+                    ${stats.top_locations.map(loc => `
+                        <div class="hunt-item">
+                            <div class="hunt-title">${loc.name}</div>
+                            <div class="hunt-stats">
+                                <div class="stat">
+                                    <div class="stat-value">${loc.avg_xp_h.toLocaleString()}</div>
+                                    <div class="stat-label">XP/h Médio</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-value">${loc.best_xp_h.toLocaleString()}</div>
+                                    <div class="stat-label">Melhor XP/h</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-value">${loc.total_hunts}</div>
+                                    <div class="stat-label">Hunts</div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                ` : ''}
             `;
-
-            // Insert after header
-            const header = document.querySelector('.header');
-            header.insertAdjacentElement('afterend', alert);
-
-            // Auto remove after 5 seconds
-            setTimeout(() => {
-                if (alert.parentNode) {
-                    alert.remove();
-                }
-            }, 5000);
         }
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            // Ctrl + S to save hunt
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                if (document.getElementById('register').classList.contains('active')) {
-                    saveHunt();
-                }
-            }
+        // Registrar hunt
+        document.getElementById('hunt-form').onsubmit = async function(e) {
+            e.preventDefault();
             
-            // Escape to close modals
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.modal').forEach(modal => {
-                    modal.style.display = 'none';
-                });
-            }
-        });
-
-        // Auto-save form data in localStorage (optional)
-        function autoSaveForm() {
-            const formData = {
-                logText: document.getElementById('logText').value,
-                huntLocation: document.getElementById('huntLocation').value,
-                huntNotes: document.getElementById('huntNotes').value
+            const data = {
+                local_hunt: document.getElementById('local-hunt').value,
+                log_text: document.getElementById('log-text').value,
+                notas: document.getElementById('notas').value
             };
-            localStorage.setItem('huntFormData', JSON.stringify(formData));
-        }
-
-        function loadSavedForm() {
-            const savedData = localStorage.getItem('huntFormData');
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                document.getElementById('logText').value = data.logText || '';
-                document.getElementById('huntLocation').value = data.huntLocation || '';
-                document.getElementById('huntNotes').value = data.huntNotes || '';
-            }
-        }
-
-        // Auto-save on form changes
-        document.addEventListener('DOMContentLoaded', function() {
-            loadSavedForm();
             
-            ['logText', 'huntLocation', 'huntNotes'].forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.addEventListener('input', autoSaveForm);
-                }
+            const response = await fetch('/api/hunts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
             });
-        });
-
-        // Clear saved form data when hunt is saved
-        const originalSaveHunt = saveHunt;
-        saveHunt = async function() {
-            const result = await originalSaveHunt();
-            if (result !== false) {
-                localStorage.removeItem('huntFormData');
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                alert('Hunt registrada com sucesso!');
+                document.getElementById('hunt-form').reset();
+                showSection('hunts');
+            } else {
+                alert(result.error || 'Erro ao registrar hunt');
             }
-            return result;
         };
 
-        // Theme toggle (optional feature)
-        function toggleTheme() {
-            document.body.classList.toggle('light-theme');
-            const isLight = document.body.classList.contains('light-theme');
-            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        // Editar hunt
+        function editHunt(id) {
+            currentEditId = id;
+            // Aqui você carregaria os dados da hunt para edição
+            document.getElementById('edit-modal').style.display = 'block';
         }
 
-        // Load saved theme
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'light') {
-                document.body.classList.add('light-theme');
-            }
-        });
-
-        // Performance optimization: debounce filter inputs
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
+        // Fechar modal
+        function closeModal() {
+            document.getElementById('edit-modal').style.display = 'none';
         }
 
-        // Apply debounced filtering
-        document.addEventListener('DOMContentLoaded', function() {
-            const debouncedFilter = debounce(applyFilters, 500);
+        // Deletar hunt
+        async function deleteHunt(id) {
+            if (!confirm('Tem certeza que deseja excluir esta hunt?')) return;
             
-            ['filterDateFrom', 'filterDateTo', 'filterMinXpH', 'filterMinProfit', 'filterLocation'].forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    element.addEventListener('input', debouncedFilter);
+            const response = await fetch(`/api/hunts/${id}`, { method: 'DELETE' });
+            
+            if (response.ok) {
+                alert('Hunt excluída com sucesso!');
+                loadHunts(currentPage);
+            } else {
+                alert('Erro ao excluir hunt');
+            }
+        }
+
+        // Mostrar botão de upload quando arquivo é selecionado
+        function showUploadButton(huntId) {
+            const uploadBtn = document.getElementById(`upload-${huntId}`);
+            uploadBtn.style.display = 'inline-block';
+        }
+
+        // Upload de vídeo
+        async function uploadVideo(huntId) {
+            const fileInput = document.getElementById(`video-${huntId}`);
+            const uploadBtn = document.getElementById(`upload-${huntId}`);
+            
+            if (!fileInput.files[0]) {
+                alert('Selecione um arquivo de vídeo primeiro!');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const maxSize = 500 * 1024 * 1024; // 500MB
+            
+            if (file.size > maxSize) {
+                alert('Arquivo muito grande! Tamanho máximo: 500MB');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('video', file);
+            
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = '📤 Enviando...';
+            
+            try {
+                const response = await fetch(`/api/upload-video/${huntId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert('Vídeo enviado com sucesso!');
+                    loadHunts(currentPage); // Recarregar para mostrar o vídeo
+                } else {
+                    alert(result.error || 'Erro ao enviar vídeo');
                 }
-            });
+            } catch (error) {
+                alert('Erro ao enviar vídeo: ' + error.message);
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = '⬆️ Enviar';
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', async function() {
+            if (await checkLogin()) {
+                loadHunts();
+            }
         });
     </script>
 </body>
