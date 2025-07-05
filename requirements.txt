@@ -1,2 +1,4 @@
 Flask
 pandas
+sqlalchemy
+psycopg2-binary
